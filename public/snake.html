@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>贪食蛇</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 20% 20%, #2a2d4a 0%, #11121e 45%, #090b12 100%);
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #ecf0ff;
+    }
+
+    .game {
+      width: min(92vw, 560px);
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(15, 19, 35, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .meta {
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      opacity: 0.95;
+    }
+
+    .meta strong {
+      color: #9fffe1;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 528px;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: #0a0d1a;
+      display: block;
+      margin: 0 auto;
+      image-rendering: pixelated;
+    }
+
+    .controls {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .tips {
+      margin: 12px 0 0;
+      font-size: 13px;
+      line-height: 1.5;
+      opacity: 0.82;
+      text-align: center;
+    }
+
+    .message {
+      min-height: 20px;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #ffd47e;
+    }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <h1>贪食蛇</h1>
+    <div class="meta">
+      <span>得分：<strong id="score">0</strong></span>
+      <span>最高分：<strong id="bestScore">0</strong></span>
+      <span>速度：<strong id="speed">2</strong> 格/秒</span>
+    </div>
+    <canvas id="board" width="528" height="528" aria-label="贪食蛇画布"></canvas>
+    <div class="controls">
+      <button id="startBtn" type="button">开始</button>
+      <button id="pauseBtn" type="button">暂停</button>
+      <button id="restartBtn" type="button">重开</button>
+    </div>
+    <div id="message" class="message"></div>
+    <p class="tips">
+      操作：方向键 / WASD。<br />
+      规则：吃到食物身体变长，撞墙或撞到自己即结束。
+    </p>
+  </main>
+
+  <script>
+    const GRID = 22;
+    const CELL_SIZE = 24;
+    const SPEED = 2;
+    const TICK_MS = Math.floor(1000 / SPEED);
+    const STORAGE_KEY = "snake_best_score";
+
+    const board = document.getElementById("board");
+    const ctx = board.getContext("2d");
+    const scoreEl = document.getElementById("score");
+    const bestEl = document.getElementById("bestScore");
+    const speedEl = document.getElementById("speed");
+    const messageEl = document.getElementById("message");
+    const startBtn = document.getElementById("startBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const restartBtn = document.getElementById("restartBtn");
+
+    let snake = [];
+    let direction = { x: 1, y: 0 };
+    let nextDirection = { x: 1, y: 0 };
+    let food = null;
+    let score = 0;
+    let bestScore = Number(localStorage.getItem(STORAGE_KEY) || 0);
+    let running = false;
+    let paused = false;
+    let timerId = null;
+
+    speedEl.textContent = String(SPEED);
+    bestEl.textContent = String(bestScore);
+
+    function resetGame() {
+      snake = [
+        { x: 11, y: 11 },
+        { x: 10, y: 11 },
+        { x: 9, y: 11 },
+      ];
+      direction = { x: 1, y: 0 };
+      nextDirection = { x: 1, y: 0 };
+      score = 0;
+      scoreEl.textContent = "0";
+      paused = false;
+      messageEl.textContent = "";
+      spawnFood();
+      draw();
+    }
+
+    function startGame() {
+      if (running) {
+        return;
+      }
+      running = true;
+      paused = false;
+      messageEl.textContent = "游戏中...";
+      timerId = setInterval(tick, TICK_MS);
+    }
+
+    function pauseGame() {
+      if (!running) {
+        return;
+      }
+      paused = !paused;
+      messageEl.textContent = paused ? "已暂停（再次点击继续）" : "游戏中...";
+    }
+
+    function stopGame(message) {
+      running = false;
+      paused = false;
+      clearInterval(timerId);
+      timerId = null;
+      messageEl.textContent = message;
+    }
+
+    function spawnFood() {
+      let candidate = null;
+      do {
+        candidate = {
+          x: Math.floor(Math.random() * GRID),
+          y: Math.floor(Math.random() * GRID),
+        };
+      } while (snake.some((part) => part.x === candidate.x && part.y === candidate.y));
+      food = candidate;
+    }
+
+    function updateBestScore() {
+      if (score <= bestScore) {
+        return;
+      }
+      bestScore = score;
+      bestEl.textContent = String(bestScore);
+      localStorage.setItem(STORAGE_KEY, String(bestScore));
+    }
+
+    function tick() {
+      if (paused) {
+        return;
+      }
+
+      direction = nextDirection;
+      const head = snake[0];
+      const newHead = { x: head.x + direction.x, y: head.y + direction.y };
+
+      if (
+        newHead.x < 0 ||
+        newHead.x >= GRID ||
+        newHead.y < 0 ||
+        newHead.y >= GRID ||
+        snake.some((part) => part.x === newHead.x && part.y === newHead.y)
+      ) {
+        updateBestScore();
+        stopGame(`游戏结束，得分 ${score}。点击“重开”再来一局。`);
+        draw();
+        return;
+      }
+
+      snake.unshift(newHead);
+
+      if (newHead.x === food.x && newHead.y === food.y) {
+        score += 1;
+        scoreEl.textContent = String(score);
+        updateBestScore();
+        spawnFood();
+      } else {
+        snake.pop();
+      }
+
+      draw();
+    }
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, board.width, board.height);
+      ctx.fillStyle = "#10152b";
+      ctx.fillRect(0, 0, board.width, board.height);
+
+      ctx.strokeStyle = "rgba(255,255,255,0.05)";
+      for (let i = 1; i < GRID; i += 1) {
+        const pos = i * CELL_SIZE + 0.5;
+        ctx.beginPath();
+        ctx.moveTo(pos, 0);
+        ctx.lineTo(pos, board.height);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, pos);
+        ctx.lineTo(board.width, pos);
+        ctx.stroke();
+      }
+    }
+
+    function drawFood() {
+      ctx.fillStyle = "#ff6b8f";
+      ctx.beginPath();
+      ctx.arc(
+        food.x * CELL_SIZE + CELL_SIZE / 2,
+        food.y * CELL_SIZE + CELL_SIZE / 2,
+        CELL_SIZE * 0.36,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+
+    function drawSnake() {
+      for (let i = 0; i < snake.length; i += 1) {
+        const part = snake[i];
+        const x = part.x * CELL_SIZE;
+        const y = part.y * CELL_SIZE;
+        const isHead = i === 0;
+        ctx.fillStyle = isHead ? "#7bffb2" : "#45d48d";
+        ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+      }
+    }
+
+    function draw() {
+      drawGrid();
+      drawFood();
+      drawSnake();
+    }
+
+    function setDirection(dx, dy) {
+      if (!running || paused) {
+        return;
+      }
+      if (direction.x === -dx && direction.y === -dy) {
+        return;
+      }
+      nextDirection = { x: dx, y: dy };
+    }
+
+    document.addEventListener("keydown", (event) => {
+      const key = event.key.toLowerCase();
+      if (key === "arrowup" || key === "w") {
+        setDirection(0, -1);
+      } else if (key === "arrowdown" || key === "s") {
+        setDirection(0, 1);
+      } else if (key === "arrowleft" || key === "a") {
+        setDirection(-1, 0);
+      } else if (key === "arrowright" || key === "d") {
+        setDirection(1, 0);
+      } else if (key === " ") {
+        event.preventDefault();
+        pauseGame();
+      }
+    });
+
+    startBtn.addEventListener("click", startGame);
+    pauseBtn.addEventListener("click", pauseGame);
+    restartBtn.addEventListener("click", () => {
+      stopGame("已重置，点击“开始”开始游戏。");
+      resetGame();
+      messageEl.textContent = "已重置，点击“开始”开始游戏。";
+    });
+
+    resetGame();
+    messageEl.textContent = "点击“开始”开始游戏。";
+  </script>
+</body>
+</html>
