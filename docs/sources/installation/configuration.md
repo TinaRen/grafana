@@ -182,6 +182,21 @@ The database user (not applicable for `sqlite3`).
 
 The database user's password (not applicable for `sqlite3`). If the password contains `#` or `;` you have to wrap it with trippel quotes. Ex `"""#password;"""`
 
+### max_idle_conn
+
+The maximum number of connections in the idle connection pool. The default value
+is `0`, which means that the database driver default is used.
+
+### max_open_conn
+
+The maximum number of open connections to the database. The default value is
+`0`, which means that the database driver default is used.
+
+> **Note:** When `type` is set to `sqlite3`, Grafana forces both
+> `max_idle_conn` and `max_open_conn` to `1`. SQLite can lock the database file
+> during concurrent writes, so Grafana uses a single database connection for
+> sqlite3 regardless of the configured pool limits.
+
 ### ssl_mode
 
 For Postgres, use either `disable`, `require` or `verify-full`.

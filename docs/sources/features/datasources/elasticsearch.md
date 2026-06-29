@@ -60,6 +60,22 @@ a time pattern for the index name or a wildcard.
 The Elasticsearch query editor allows you to select multiple metrics and group by multiple terms or filters. Use the plus and minus icons to the right to add / remove
 metrics or group bys. Some metrics and group by have options, click the option text to expand the the row to view and edit metric or group by options.
 
+### Histogram aggregation
+
+Use the **Histogram** group by option to bucket documents by a numeric field. The
+histogram bucket has two options:
+
+* **Interval** - The numeric bucket width. The default is `1000`.
+* **Min Doc Count** - The minimum number of documents required for a bucket to be
+  returned. The default is `1`.
+
+Histogram aggregations are useful when values are already grouped before they
+reach the panel. For example, use a Histogram group by on a numeric field
+together with a Date Histogram group by, then set the
+[Heatmap panel]({{< relref "../panels/heatmap.md" >}}) data format to **ES
+histogram**. In that mode the Heatmap panel uses the histogram bucket keys as
+the Y axis buckets and the date histogram buckets as the X axis buckets.
+
 ## Pipeline metrics
 
 If you have Elasticsearch 2.x and Grafana 2.6 or above then you can use pipeline metric aggregations like
