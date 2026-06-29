@@ -47,6 +47,17 @@ create a support issue, screen shots and or text information about the
 chrome console error, request and response information from the
 `Network` tab in Chrome developer tools are of great help.
 
+## SQLite database is locked
+
+If Grafana logs `database is locked` while using the default `sqlite3`
+database, check whether concurrent writes are reaching the same database file.
+Grafana uses a single database connection for sqlite3 to avoid SQLite threading
+and file-locking issues; the `max_idle_conn` and `max_open_conn` settings are
+forced to `1` for sqlite3. For installations with heavier write concurrency,
+configure MySQL or Postgres instead. See the
+[[database]]({{< relref "configuration.md#database" >}}) configuration section
+for the available database settings.
+
 ### Inspecting Grafana metric requests
 
 ![](/img/docs/v1/toubleshooting_chrome_dev_tools_network.png)
