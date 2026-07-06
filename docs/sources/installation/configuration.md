@@ -161,7 +161,27 @@ Either `mysql`, `postgres` or `sqlite3`, it's your choice.
 ### path
 
 Only applicable for `sqlite3` database. The file path where the database
-will be stored.
+will be stored. If the path is not absolute, it is relative to the
+`data` path.
+
+### max_idle_conn
+
+The maximum number of connections in the idle connection pool. The
+default value is `0`, which means no idle connections are retained.
+
+### max_open_conn
+
+The maximum number of open connections to the database. The default
+value is `0`, which means there is no limit on the number of open
+connections.
+
+When the database `type` is `sqlite3`, Grafana overrides both
+`max_idle_conn` and `max_open_conn` to `1`. This avoids intermittent
+`database locked` errors caused by concurrent writes to the embedded
+sqlite3 database. Do not increase these values for sqlite3 deployments.
+Use `mysql` or `postgres` if you need more than one Grafana server to
+write to the same database, as described in the
+[[high availability setup]]({{< relref "tutorials/ha_setup.md" >}}).
 
 ### host
 
