@@ -167,12 +167,13 @@ will be stored. If the path is not absolute, it is relative to the
 ### max_idle_conn
 
 The maximum number of connections in the idle connection pool. The
-default value is `0`, which means the setting is not applied.
+default value is `0`, which means no idle connections are retained.
 
 ### max_open_conn
 
 The maximum number of open connections to the database. The default
-value is `0`, which means the setting is not applied.
+value is `0`, which means there is no limit on the number of open
+connections.
 
 When the database `type` is `sqlite3`, Grafana overrides both
 `max_idle_conn` and `max_open_conn` to `1`. This avoids intermittent
