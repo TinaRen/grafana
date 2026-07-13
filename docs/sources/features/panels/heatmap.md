@@ -46,9 +46,10 @@ For example, if Elasticsearch returns one series named `100` and another named `
 those names as Y bucket bounds. The datapoint timestamps become X bucket bounds, and the datapoint values
 become the bucket counts.
 
-When using `ES histogram`, Grafana derives the X and Y bucket sizes from the returned bucket bounds. For
-regular axes it uses the smallest distance between adjacent bounds. For logarithmic Y axes it uses the
-smallest logarithmic distance and maps that to the split-bucket setting.
+When using `ES histogram`, Grafana derives the X and Y bucket sizes from the bucket bounds that remain
+after empty and zero-count buckets are skipped. For linear axes it uses the smallest distance between
+adjacent bounds. For logarithmic Y axes it uses the smallest logarithmic distance and maps that to the
+split-bucket setting.
 
 ## Axes and buckets
 
@@ -56,17 +57,18 @@ The `Axes` tab controls bucket sizing and axis display.
 
 ### X axis
 
-- `Show` toggles the time axis.
+- `Show` toggles the time-axis grid and tick lines.
 - `Buckets` sets the target number of X buckets. If left empty, Grafana uses 30 buckets.
 - `Bucket Size` sets an explicit X bucket size and takes priority over `Buckets`. It accepts a number
   of milliseconds or an interval such as `10s`, `5m`, or `1h`.
 
 ### Y axis
 
-- `Show` toggles the value axis.
+- `Show` toggles the value-axis grid and tick lines.
 - `Unit` controls value formatting.
 - `Scale` supports linear scale and logarithmic scales with bases 2, 10, 32, and 1024.
-- `Y-Min` and `Y-Max` override the automatic Y-axis range.
+- `Y-Min` and `Y-Max` override the automatic Y-axis range. On logarithmic scales, Grafana rounds these
+  values to powers of the selected log base.
 - `Decimals` overrides automatic decimal precision for axis labels.
 
 For a linear Y axis:
@@ -129,5 +131,5 @@ Zero or empty counts are skipped, so a query that only returns zero counts will 
 ### Bucket sizes look unexpected
 
 For `Timeseries`, explicit `Bucket Size` values override the bucket count settings. For `ES histogram`,
-Grafana derives bucket sizes from the returned bucket bounds, so uneven histogram bounds can make the
-smallest distance determine the displayed card size.
+Grafana derives bucket sizes from the non-empty returned bucket bounds, so sparse or uneven histogram
+bounds can make the smallest remaining distance determine the displayed card size.
