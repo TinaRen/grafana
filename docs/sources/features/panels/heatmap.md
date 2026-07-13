@@ -46,10 +46,10 @@ For example, if Elasticsearch returns one series named `100` and another named `
 those names as Y bucket bounds. The datapoint timestamps become X bucket bounds, and the datapoint values
 become the bucket counts.
 
-When using `ES histogram`, Grafana derives the X and Y bucket sizes from the bucket bounds that remain
-after empty and zero-count buckets are skipped. For linear axes it uses the smallest distance between
-adjacent bounds. For logarithmic Y axes it uses the smallest logarithmic distance and maps that to the
-split-bucket setting.
+When using `ES histogram`, Grafana derives the X bucket size from the time buckets that remain after
+empty and zero-count buckets are skipped. The Y bucket size is derived from the returned series aliases.
+For linear axes it uses the smallest distance between adjacent bounds. For logarithmic Y axes it uses
+the smallest logarithmic distance and maps that to the split-bucket setting.
 
 ## Axes and buckets
 
@@ -131,5 +131,6 @@ Zero or empty counts are skipped, so a query that only returns zero counts will 
 ### Bucket sizes look unexpected
 
 For `Timeseries`, explicit `Bucket Size` values override the bucket count settings. For `ES histogram`,
-Grafana derives bucket sizes from the non-empty returned bucket bounds, so sparse or uneven histogram
-bounds can make the smallest remaining distance determine the displayed card size.
+Grafana derives the X bucket size from non-empty time buckets and the Y bucket size from returned series
+aliases, so sparse or uneven histogram output can make the smallest derived distance determine the
+displayed card size.
