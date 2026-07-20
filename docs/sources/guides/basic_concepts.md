@@ -65,9 +65,9 @@ There are a wide variety of styling and formatting options that each Panel expos
 
 Panels can be dragged and dropped and rearranged on the Dashboard. They can also be resized.
 
-There are currently four Panel types: [Graph](/reference/graph/), [Singlestat](/reference/singlestat/), [Dashlist](/reference/dashlist/), [Table](/reference/table_panel/),and [Text](/reference/text/).
+Grafana includes several core panel types: [Graph]({{< relref "features/panels/graph.md" >}}), [Singlestat]({{< relref "features/panels/singlestat.md" >}}), [Dashboard list]({{< relref "features/panels/dashlist.md" >}}), [Table]({{< relref "features/panels/table_panel.md" >}}), [Heatmap]({{< relref "features/panels/heatmap.md" >}}), and Text.
 
-Panels like the [Graph](/reference/graph/) panel allow you to graph as many metrics and series as you want. Other panels like [Singlestat](/reference/singlestat/) require a reduction of a single query into a single number. [Dashlist](/reference/dashlist/) and [Text](/reference/text/) are special panels that do not connect to any Data Source.
+Panels like the [Graph]({{< relref "features/panels/graph.md" >}}) panel allow you to graph as many metrics and series as you want. Other panels like [Singlestat]({{< relref "features/panels/singlestat.md" >}}) require a reduction of a single query into a single number. The [Heatmap]({{< relref "features/panels/heatmap.md" >}}) panel shows distributions of values over time. [Dashboard list]({{< relref "features/panels/dashlist.md" >}}) and Text are special panels that do not connect to any Data Source.
 
 Panels can be made more dynamic by utilizing [Dashboard Templating](/reference/templating/) variable strings within the panel configuration (including queries to your Data Source configured via the Query Editor).
 
