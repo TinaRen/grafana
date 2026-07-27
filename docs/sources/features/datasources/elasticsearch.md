@@ -53,12 +53,48 @@ Elasticsearch from the browser. You do this by specifying these to options in yo
 Here you can specify a default for the `time field` and specify the name of your elasticsearch index. You can use
 a time pattern for the index name or a wildcard.
 
+When you click **Save & Test**, Grafana verifies that the selected index exists
+and that it contains a date field matching the configured `time field`. If the
+field is missing, Grafana returns an error such as `No date field named @timestamp found`.
+Elasticsearch error reasons are shown when the server returns one.
+
 ## Metric Query editor
 
 ![](/img/docs/elasticsearch/query_editor.png)
 
 The Elasticsearch query editor allows you to select multiple metrics and group by multiple terms or filters. Use the plus and minus icons to the right to add / remove
 metrics or group bys. Some metrics and group by have options, click the option text to expand the the row to view and edit metric or group by options.
+
+### Histogram group by
+
+Use the **Histogram** group by to split a numeric field into fixed-width buckets.
+The histogram options are:
+
+Name | Description
+------------ | -------------
+Field | Numeric Elasticsearch field to bucket.
+Interval | Numeric width of each bucket. Defaults to `1000` when left empty.
+Min Doc Count | Minimum document count required for a bucket to be returned. Defaults to `1` in the query editor.
+
+Grafana sends the histogram aggregation with the selected `field`, `interval`
+and `min_doc_count`. Elasticsearch returns the bucket key and document count for
+each numeric range.
+
+#### Heatmap panel
+
+Histogram aggregations are useful with the [Heatmap panel]({{< relref "features/panels/heatmap.md" >}}) when you want Elasticsearch to calculate the Y-axis buckets.
+
+For a Heatmap query:
+
+1. Add a **Count** metric.
+2. Add a **Histogram** group by for the numeric field.
+3. Add a **Date Histogram** group by after the numeric histogram.
+4. In the Heatmap **Axes** tab, set **Data format** to **ES histogram**.
+
+The **Date Histogram** must be the last group by so Grafana returns time series
+instead of document-style rows. Leave the alias empty, or use a numeric alias
+template such as `{{bytes}}`, because the Heatmap panel uses the returned series
+name as the numeric Y bucket bound.
 
 ## Pipeline metrics
 
