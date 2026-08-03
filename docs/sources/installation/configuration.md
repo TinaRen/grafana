@@ -214,10 +214,9 @@ max_open_conn = 100
 ```
 
 > **Note:** When `type` is `sqlite3`, Grafana overrides both connection
-> settings to `1`. SQLite allows concurrent readers, but multiple open
-> Grafana database connections can cause locked database errors during
-> concurrent writes. Use MySQL or Postgres if you need a database backend
-> that supports higher write concurrency.
+> settings to `1` to avoid locked database errors from multiple database
+> connections. Use MySQL or Postgres if you need a database backend that
+> supports higher write concurrency.
 
 ### ssl_mode
 
