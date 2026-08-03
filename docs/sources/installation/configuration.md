@@ -151,7 +151,7 @@ embedded database (included in the main Grafana binary).
 
 ### url
 
-Use either URL or or the other fields below to configure the database
+Use either URL or the other fields below to configure the database.
 Example: `mysql://user:secret@host:port/database`
 
 ### type
@@ -161,7 +161,8 @@ Either `mysql`, `postgres` or `sqlite3`, it's your choice.
 ### path
 
 Only applicable for `sqlite3` database. The file path where the database
-will be stored.
+will be stored. If the path is relative, it is relative to the Grafana
+`data` path.
 
 ### host
 
@@ -180,7 +181,43 @@ The database user (not applicable for `sqlite3`).
 
 ### password
 
-The database user's password (not applicable for `sqlite3`). If the password contains `#` or `;` you have to wrap it with trippel quotes. Ex `"""#password;"""`
+The database user's password (not applicable for `sqlite3`). If the password contains `#` or `;` you have to wrap it with triple quotes. Ex `"""#password;"""`
+
+### max_idle_conn
+
+Maximum number of connections in the idle connection pool. This setting
+applies to MySQL and Postgres. The default value is `0`, which means no
+idle connections are retained.
+
+### max_open_conn
+
+Maximum number of open connections to the database. This setting applies
+to MySQL and Postgres. The default value is `0`, which means there is no
+limit on the number of open connections.
+
+These settings are read when the database is configured with the separate
+`type`, `host`, `name`, `user`, and `password` fields. When `url` is set,
+the connection details are parsed from the URL instead and the connection
+pool fields above are not read.
+
+Example:
+
+```ini
+[database]
+type = mysql
+host = 127.0.0.1:3306
+name = grafana
+user = grafana
+password = grafana
+max_idle_conn = 10
+max_open_conn = 100
+```
+
+> **Note:** When `type` is `sqlite3`, Grafana overrides both connection
+> settings to `1`. SQLite allows concurrent readers, but multiple open
+> Grafana database connections can cause locked database errors during
+> concurrent writes. Use MySQL or Postgres if you need a database backend
+> that supports higher write concurrency.
 
 ### ssl_mode
 
