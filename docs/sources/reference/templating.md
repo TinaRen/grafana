@@ -23,9 +23,9 @@ You can configure Dashboard Templating by clicking the dropdown cog on the top o
 
 ## Variable types
 
-There are three different types of Template variables: query, custom, and interval.
+There are several different types of Template variables: query, custom, interval, constant, data source, and ad hoc filters.
 
-They can all be used to create dynamic variables that you can use throughout the Dashboard, but they differ in how they get the data for their values.
+They can all be used to create dynamic variables that you can use throughout the Dashboard, but they differ in how they get the data for their values and which dashboard features they support.
 
 
 ### Query
@@ -73,11 +73,40 @@ Use the `Interval` type to create Template variables around time ranges (eg. `1m
 
 Use the `Custom` type to manually create Template variables around explicit values that are hard-coded into the Dashboard, and not dependent on any Data Source. You can specify multiple Custom Template values by separating them with a comma.
 
+### Constant
+
+Use the `Constant` type to define a hidden constant value. Constant variables are useful for metric prefixes or other fixed values in dashboards that you want to share or export.
+
+When a dashboard is exported, constant variables are converted to import inputs so the value can be supplied when the dashboard is imported.
+
+### Data source
+
+Use the `Datasource` type to quickly change the data source for an entire dashboard. The variable's **Type** option selects a data source plugin type, such as Graphite or Prometheus, and the value dropdown is populated with configured data source instances of that type.
+
+You can use the optional **Instance name filter** regex to limit which data source instances are available. For example, `/^prod/` only shows instances whose names start with `prod`.
+
+To use a data source variable, set a panel's data source to the variable name, for example `$datasource`. Grafana resolves the variable before loading the panel data source, so every panel that uses `$datasource` switches when the dashboard user selects another value.
+
+Data source variables do not support multi-value or the `All` option. Use a query or custom variable when you need multiple selected values for repeating rows or panels.
+
+### Ad hoc filters
+
+Use the `Ad hoc filters` type to add key/value filters that are automatically applied to all metric queries that use the selected data source. The selected data source must support ad hoc filters.
+
 ##  Repeating Panels and Repeating Rows
 
 Template Variables can be very useful to dynamically change what you're visualizing on a given panel. Sometimes, you might want to create entire new Panels (or Rows) based on what Template Variables have been selected. This is now possible in Grafana 2.1.
 
-Once you've got your Template variables (of any type) configured the way you'd like, check out the Repeating Panels and Repeating Row documentation
+Repeating rows and panels use the selected options from a variable. If the variable has the `All` option selected, Grafana creates one row or panel for each concrete option except `All`.
+
+For multiple repeated rows or panels, use a variable type that supports **Multi-value** or **Include All option**, such as `Query` or `Custom`. A single-value variable can only produce one repeated row or panel, and data source variables are intended for switching the panel data source rather than driving repeats.
+
+Example:
+
+1. Create a `Query` variable named `server` that returns server names.
+2. Enable **Multi-value** or **Include All option** on the variable.
+3. Set a panel's **Repeat Panel** option to `server`.
+4. Use `$server` in the panel title or query. Each repeated panel receives one selected server value.
 
 ## Screencast - Templated Graphite Queries
 
