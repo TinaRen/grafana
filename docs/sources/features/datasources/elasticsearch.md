@@ -53,6 +53,13 @@ Elasticsearch from the browser. You do this by specifying these to options in yo
 Here you can specify a default for the `time field` and specify the name of your elasticsearch index. You can use
 a time pattern for the index name or a wildcard.
 
+### Save & Test
+
+When you click **Save & Test**, Grafana asks Elasticsearch for the index mapping and checks that the configured
+`time field` exists as a date field. A successful check returns `Index OK. Time field name OK.`. If the mapping
+does not contain the configured date field, Grafana returns `No date field named <field> found`. Elasticsearch
+connection or mapping errors are returned as the Elasticsearch error reason when available.
+
 ## Metric Query editor
 
 ![](/img/docs/elasticsearch/query_editor.png)
