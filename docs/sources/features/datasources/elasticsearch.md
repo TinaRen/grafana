@@ -60,6 +60,36 @@ a time pattern for the index name or a wildcard.
 The Elasticsearch query editor allows you to select multiple metrics and group by multiple terms or filters. Use the plus and minus icons to the right to add / remove
 metrics or group bys. Some metrics and group by have options, click the option text to expand the the row to view and edit metric or group by options.
 
+### Bucket aggregations
+
+Use the **Group by** rows in the query editor to build Elasticsearch bucket aggregations. Grafana nests the
+bucket aggregations in the order they appear in the editor, so place broader groups first and the time bucket last
+when you want a time series.
+
+Group by | Use for | Important settings
+------------ | ------------- | -------------
+Terms | Splitting a metric by a field value, for example one series per `host` or `status` | `Order`, `Size`, `Min Doc Count`, `Order By`, and `Missing`
+Filters | Splitting a metric into named Lucene queries, for example `status:500` and `status:200` | One or more query strings
+Date Histogram | Creating time buckets using the data source time field | `Interval`, `Min Doc Count`, and `Trim edges`
+Histogram | Grouping numeric fields into fixed-size buckets, for example request sizes or latency ranges | `Interval` and `Min Doc Count`
+Geo Hash Grid | Grouping geo-point fields for map-style aggregations | `Precision`
+
+For normal graph panels, include a **Date Histogram** as the last group by. If the last bucket is not a date
+histogram, Grafana returns the aggregation result as table data. Use the table panel's **JSON Data** transform for
+queries such as a plain numeric **Histogram** over a `bytes` field.
+
+Example graph query:
+
+1. Metric: `Average` on `load_time`.
+2. Group by: `Terms` on `host`, then `Date Histogram` on `@timestamp`.
+3. Result: one time series per host, named from the host bucket and metric.
+
+Example numeric histogram query:
+
+1. Metric: `Count`.
+2. Group by: `Histogram` on `bytes` with `Interval` set to `10000`.
+3. Result: table rows with a `bytes` bucket column and a `Count` column.
+
 ## Pipeline metrics
 
 If you have Elasticsearch 2.x and Grafana 2.6 or above then you can use pipeline metric aggregations like
