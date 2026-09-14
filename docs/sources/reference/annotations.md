@@ -20,6 +20,13 @@ dropdown. This will open the `Annotations` edit view. Click the `Add` tab to add
 
 > Note: Annotations apply to all graphs in a given dashboard, not on a per-panel basis.
 
+## Viewing annotations in tables
+
+Graph panels show annotations as event markers. To inspect the same events as rows, add a Table panel and
+set **To Table Transform** to **Annotations**. The table uses the dashboard's enabled annotation queries for
+the selected time range and shows `Time`, `Title`, `Text`, and `Tags` columns. Queries in the table panel's
+**Metrics** tab are ignored while this transform is selected.
+
 ## Graphite annotations
 
 Graphite supports two ways to query annotations.

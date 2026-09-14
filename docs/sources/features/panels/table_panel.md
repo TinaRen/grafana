@@ -56,8 +56,20 @@ This table transformation will lay out your table into rows by metric, allowing 
 ### Annotations
 ![](/img/docs/v2/table_annotations.png)
 
-If you have annotations enabled in the dashboard you can have the table show them. If you configure this
-mode then any queries you have in the metrics tab will be ignored.
+Use the **Annotations** transform to list dashboard annotation events in the table panel. The table reads
+the enabled annotation queries from the dashboard `Annotations` settings for the current time range and
+renders them with these columns:
+
+- `Time`: the annotation timestamp.
+- `Title`: the annotation title.
+- `Text`: optional annotation body text.
+- `Tags`: optional annotation tags.
+
+When the panel uses this transform, queries in the **Metrics** tab are ignored. Configure annotation
+queries in dashboard settings instead. If the table panel also has an alert rule, annotations created by
+that alert for the same panel are included with the dashboard annotations.
+
+If no enabled annotation query returns events for the selected time range, the panel shows **No data to show**.
 
 ### JSON Data
 ![](/img/docs/v2/table_json_data.png)
