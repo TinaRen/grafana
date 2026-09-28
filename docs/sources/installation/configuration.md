@@ -619,9 +619,11 @@ Time to live for snapshots.
 
 ## [external_image_storage]
 These options control how images should be made public so they can be shared on services like slack.
+Grafana uses this setting when alert notifications include panel images and the notification type needs
+a URL that can be reached outside of Grafana.
 
 ### provider
-You can choose between (s3, webdav). If left empty Grafana will ignore the upload action.
+You can choose between `s3` and `webdav`. If left empty Grafana will ignore the upload action.
 
 ## [external_image_storage.s3]
 
@@ -631,10 +633,19 @@ Bucket URL for S3. AWS region can be specified within URL or defaults to 'us-eas
 - https://grafana.s3-ap-southeast-2.amazonaws.com/
 - https://grafana.s3-cn-north-1.amazonaws.com.cn
 
+Grafana also accepts path-style S3 URLs where the bucket name is in the path, e.g.
+- https://s3.amazonaws.com/grafana
+- https://s3-us-west-2.amazonaws.com/grafana
+
+The bucket name is parsed from `bucket_url` and the uploaded image is written with the `public-read`
+ACL so alert notifications can link to it.
+
 ### access_key
 Access key. e.g. AAAAAAAAAAAAAAAAAAAA
 
-Access key requires permissions to the S3 bucket for the 's3:PutObject' and 's3:PutObjectAcl' actions.
+Access key requires permissions to the S3 bucket for the `s3:PutObject` and `s3:PutObjectAcl` actions.
+If `access_key` and `secret_key` are left blank, Grafana falls back to the AWS SDK credential chain,
+such as environment variables or the instance IAM role.
 
 ### secret_key
 Secret key. e.g. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
