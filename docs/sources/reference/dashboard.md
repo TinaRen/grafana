@@ -28,6 +28,7 @@ When a user creates a new dashboard, a new dashboard JSON object is initialized 
 {
   "id": null,
   "title": "New dashboard",
+  "description": "A dashboard for important service metrics.",
   "tags": [],
   "style": "dark",
   "timezone": "browser",
@@ -60,20 +61,21 @@ Each field in the dashboard JSON is explained below with its usage:
 | ---- | ----- |
 | **id** | unique dashboard id, an integer |
 | **title** | current title of dashboard |
+| **description** | optional dashboard description configured in dashboard settings |
 | **tags** | tags associated with dashboard, an array of strings |
 | **style** | theme of dashboard, i.e. `dark` or `light` |
 | **timezone** | timezone of dashboard, i.e. `utc` or `browser` |
 | **editable** | whether a dashboard is editable or not |
 | **hideControls** | whether row controls on the left in green are hidden or not |
-| **graphTooltip** | TODO |
+| **graphTooltip** | shared cursor behavior for graph panels: `0` is default, `1` is shared crosshair, `2` is shared crosshair and shared tooltip |
 | **rows** | row metadata, see [rows section](#rows) for details |
 | **time** | time range for dashboard, i.e. last 6 hours, last 7 days, etc |
 | **timepicker** | timepicker metadata, see [timepicker section](#timepicker) for details |
 | **templating** | templating metadata, see [templating section](#templating) for details |
 | **annotations** | annotations metadata, see [annotations section](#annotations) for details |
-| **schemaVersion** | TODO |
-| **version** | TODO |
-| **links** | TODO |
+| **schemaVersion** | version of the dashboard JSON schema; Grafana uses this when migrating older dashboards |
+| **version** | dashboard revision number; it is incremented each time the dashboard is saved |
+| **links** | dashboard links displayed in the dashboard submenu |
 
 ### rows
 
@@ -118,6 +120,7 @@ Panels are the building blocks a dashboard. It consists of datasource queries, t
           "aliasColors": {},
           "bars": false,
           "datasource": null,
+          "description": "Shows memory usage for the selected hosts.",
           "editable": true,
           "error": false,
           "fill": 0,
@@ -270,7 +273,38 @@ Usage of each field is explained below:
 
 | Name | Usage |
 | ---- | ----- |
-| TODO | TODO |
+| **id** | unique panel id within the dashboard |
+| **title** | panel title shown in the panel header |
+| **description** | optional Markdown help text shown from the panel info corner and inspector |
+| **type** | panel plugin type, for example `graph`, `singlestat`, or `table` |
+| **datasource** | datasource name for the panel queries; `null` uses the default datasource |
+| **targets** | query definitions sent to the datasource |
+| **span** | panel width in the 12-column dashboard grid |
+| **height** | panel height; if omitted, the row height is used |
+| **editable** | whether the panel can be edited |
+| **error** | panel error state shown in the panel info corner |
+| **links** | drilldown links configured in the panel General tab |
+| **timeFrom** | optional panel-specific relative time override |
+| **timeShift** | optional panel-specific time shift |
+| **tooltip** | graph panel tooltip settings |
+
+#### Panel descriptions and links
+
+Panel descriptions are configured on the panel editor's **General** tab. The
+description supports Markdown and links, and Grafana interpolates template
+variables before rendering it in the panel information view. Use this field for
+short runbook notes, query assumptions, or links that explain why the panel
+exists.
+
+When a panel has an error, a description, or panel links, Grafana shows an
+information corner in the panel. Hovering the corner opens a tooltip that is
+pinned inside the browser window; clicking it opens the panel inspector on the
+**Panel Description** tab. Panel errors take precedence over descriptions, and
+descriptions are shown before panel links.
+
+Panel links can point to another dashboard or to an absolute URL. Links can keep
+the current time range, include current template variable values, append custom
+URL parameters, and open in a new tab.
 
 ### timepicker
 
