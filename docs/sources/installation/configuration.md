@@ -269,7 +269,22 @@ Set to true to disable (hide) the login form, useful if you use OAuth, defaults 
 
 ### disable_signout_menu
 
-Set to true to disable the signout link in the side menu. useful if you use auth.proxy, defaults to false.
+Set to `true` to hide the **Sign out** link from the user menu in the side
+menu. Defaults to `false`.
+
+This is useful when Grafana runs behind an authentication proxy, OAuth
+gateway, or other external identity provider where signing out should happen
+outside of Grafana. The option is read from `[auth]`, sent to the frontend as
+`disableSignoutMenu`, and only changes whether the side menu renders the
+link. It does not disable the `/logout` route or terminate sessions managed by
+an upstream proxy.
+
+Example:
+
+```ini
+[auth]
+disable_signout_menu = true
+```
 
 <hr>
 
