@@ -203,6 +203,22 @@ For MySQL, use either `true`, `false`, or `skip-verify`.
 
 (MySQL only) The common name field of the certificate used by the `mysql` server. Not necessary if `ssl_mode` is set to `skip-verify`.
 
+### MySQL character set
+
+Grafana opens MySQL connections with `charset=utf8mb4` and creates new tables with
+`DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci`. Startup migrations also
+update existing Grafana tables so text columns use the same character set and
+collation.
+
+You do not need to add a `charset` query parameter to the `url` option. Grafana
+parses the configured URL into the standard database fields and builds the MySQL
+connection string itself.
+
+Because `utf8mb4` can use up to four bytes per character, indexed string fields
+in Grafana's schema are limited to 190 characters. For example, organization
+names, user logins and emails, dashboard slugs, data source names, and API key
+names use this limit so their indexes fit safely.
+
 <hr />
 
 ## [security]
