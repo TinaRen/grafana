@@ -32,24 +32,32 @@ Name | Description
 ------------ | -------------
 Name | The data source name, important that this is the same as in Grafana v1.x if you plan to import old dashboards.
 Default | Default data source means that it will be pre-selected for new panels.
-Credentials profile name | Specify the name of the profile to use (if you use `~/aws/credentials` file), leave blank for default. This option was introduced in Grafana 2.5.1
+Auth Provider | Select `Access & secret key`, `Credentials file`, or `ARN`.
+Credentials profile name | Specify the name of the profile to use (if you use `~/.aws/credentials` file), leave blank for default. This option was introduced in Grafana 2.5.1
+Access key | AWS access key ID. Only shown when `Access & secret key` is selected.
+Secret key | AWS secret access key. Only shown when `Access & secret key` is selected.
 Default Region | Used in query editor to set region (can be changed on per query basis)
 Custom Metrics namespace | Specify the CloudWatch namespace of Custom metrics
-Assume Role Arn | Specify the ARN of the role to assume
+Assume Role ARN | Specify the ARN of the role to assume. Only shown when `ARN` is selected.
 
 ## Authentication
 
-### IAM Roles
+Grafana calls CloudWatch from the Grafana backend by using the AWS SDK. Select the
+authentication provider that matches how the Grafana server receives AWS
+credentials.
 
-Currently all access to CloudWatch is done server side by the Grafana backend using the official AWS SDK. If you grafana
-server is running on AWS you can use IAM Roles and authentication will be handled automatically.
+### Access and secret key
 
-Checkout AWS docs on [IAM Roles](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+Select **Access & secret key** when you want Grafana to store a specific AWS
+access key pair for this data source. The keys are saved as secure data source
+settings and are used only by the Grafana backend.
 
-### AWS credentials file
+### Credentials file
 
-Create a file at `~/.aws/credentials`. That is the `HOME` path for user running grafana-server.
-    > NOTE: If you think you have the credentials file in the right place but it is still not working then you might try moving your .aws file to '/usr/share/grafana/' and make sure your credentials file has at most 0644 permissions.
+Select **Credentials file** to use a profile from the AWS credentials file on the
+Grafana server. The profile name maps to a section in `~/.aws/credentials` for
+the user that runs `grafana-server`; leave the profile name blank to use the
+default profile.
 
 Example content:
 
@@ -57,6 +65,46 @@ Example content:
     aws_access_key_id = asdsadasdasdasd
     aws_secret_access_key = dasdasdsadasdasdasdsa
     region = us-west-2
+
+    [production]
+    aws_access_key_id = asdsadasdasdasd
+    aws_secret_access_key = dasdasdsadasdasdasdsa
+    region = us-east-1
+
+> **Note:** If you think you have the credentials file in the right place but
+> Grafana still cannot authenticate, check the home directory of the
+> `grafana-server` process. Package installs often run Grafana as a service user,
+> so the credentials file might need to be readable from that user's home
+> directory. The credentials file should have at most `0644` permissions.
+
+### IAM roles
+
+Currently all access to CloudWatch is done server side by the Grafana backend using the official AWS SDK. If your Grafana
+server is running on AWS you can use IAM roles and authentication will be handled automatically.
+
+Checkout AWS docs on [IAM Roles](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+
+### Assume Role ARN
+
+Select **ARN** when Grafana should call AWS Security Token Service (STS) and
+assume a role before querying CloudWatch. The ARN must start with
+`arn:aws:iam:`.
+
+Grafana needs source credentials before it can assume the role. It checks these
+sources on the server:
+
+1. AWS environment variables.
+2. The selected AWS credentials profile.
+3. Remote credentials from the AWS runtime:
+   - On ECS container tasks, Grafana uses the
+     `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI` environment variable and requests
+     credentials from `169.254.170.2`.
+   - Outside ECS, Grafana falls back to the EC2 instance metadata role provider.
+
+Grafana caches the temporary STS credentials until their AWS expiration time.
+When troubleshooting Assume Role failures, verify that the source credentials can
+call `sts:AssumeRole`, that the target role trusts the source principal, and that
+the CloudWatch data source region matches the AWS region you expect to query.
 
 
 ## Metric Query Editor
